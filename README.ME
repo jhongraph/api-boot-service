@@ -1,0 +1,53 @@
+# 🤖 Automatización de Pre-venta-Registro con Selenium y Spring Boot
+
+Este proyecto automatiza el proceso de **pre-venta-registro**
+en el portal de vehículos, utilizando Selenium, Java y Spring Boot.
+Está diseñado para ejecutarse como un `.jar` empaquetado
+o dentro de un contenedor Docker.
+
+---
+
+## 🧱 Estructura del Proyecto
+
+boot001/
+├── ChromeDriver/             # ChromeDriver para entorno Linux (uso en Docker)
+├── source/
+│   └── main/
+│       ├── java/
+│       │   └── com/testboot/boot__001/
+│       │       ├── config/             # Beans, WebDriverConfig, etc.
+│       │       ├── env/                # Variables de entorno (inyectables)
+│       │       ├── exections/          # Manejo de excepciones personalizadas
+│       │       ├── pojo/
+│       │       │   └── Car.java        # POJO con info del vehículo
+│       │       ├── service/
+│       │       │   └── PreSaleService.java
+│       │       │       # Servicio principal con el flujo completo
+│       │       └── utils/
+│       │           └── Generador.java  # Generación de datos automáticos
+│       └── resources/
+│           ├── application.yaml        # Configuración general (variables de entorno)
+│           └── logback.xml             # Configuración de logs
+├── target/                  # Carpeta generada con el `.jar`
+├── pom.xml                  # Dependencias y configuración Maven
+
+🔄 Flujo automatizado del programa
+
+1- Inicia sesión en el portal de vehículos utilizando las credenciales definidas en el archivo
+de configuración.
+
+2- Navega a la sección de Preventa: El programa dirige automáticamente el navegador
+ a la sección de pre-venta-registro en el portal.
+
+3- Rellena formularios con datos automáticos:
+El programa genera automáticamente los datos requeridos (como marca, modelo, año, etc.)
+y los inserta en los formularios del portal.
+
+4- Confirma y firma digitalmente: Una vez que se ha completado el formulario,
+el programa confirma los datos ingresados y realiza la firma digital.
+
+5- Carga el archivo PDF: El programa sube un archivo PDF específico a la plataforma,
+como parte del proceso de registro.
+
+6- Repite el proceso: El flujo se repite el número de veces indicado en el ciclo,
+que puede ser configurado en el archivo application.yaml.

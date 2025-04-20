@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Appender global para todos los logs -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Appender personalizado para tu paquete con color -->
+    <appender name="CUSTOM_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- %highlight también sirve, pero con %clr puedes personalizar -->
+            <pattern>%clr(%5p){green}: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger específico para tu paquete -->
+    <logger name="com.TestBoot.boot_001" level="DEBUG" additivity="false">
+        <appender-ref ref="CUSTOM_CONSOLE"/>
+    </logger>
+
+</configuration>

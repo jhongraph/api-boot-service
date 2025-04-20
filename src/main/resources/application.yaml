@@ -1,0 +1,32 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: boot-001
+utilities:
+  user: "jovidio"
+  password: "12345"
+  licence: "7006169"
+  base_url: "https://testwaf.portaldevehiculos.com/"
+  login_url: "Forms/Account/LoginNew.aspx"
+  home_url: "Default.aspx"
+  preventa_url: "Forms/CarPartialRegistrationBatch.aspx"
+  pdf_route: "C:\\Users\\jgraph\\Desktop\\pdf.pdf"
+  ciclo: "1000"
+  wait_time_out: "60"
+Chrome_driver:
+    path: "./chromedriver-win64/chromedriver-win64/chromedriver.exe"
+logging:
+  level:
+    root: INFO
+    com.TestBoot.boot_001: DEBUG
+    org.springframework.boot.web.embedded.tomcat.GracefulShutdown: ERROR
+    org.springframework.beans.factory.support.DisposableBeanAdapter: ERROR
+    org.openqa.selenium: ERROR
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%15.15t]){faint} %clr(%-5level) %clr(%logger{39}){cyan} : %msg%n"
+  group:
+    boot001: com.TestBoot.boot_001
+  levelpattern:
+    boot001: "%clr(%-5level){%level_color}: %msg%n"
