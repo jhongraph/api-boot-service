@@ -13,7 +13,8 @@
     <appender name="CUSTOM_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <!-- %highlight también sirve, pero con %clr puedes personalizar -->
-            <pattern>%clr(%5p){green}: %msg%n</pattern>
+            <pattern>%clr(%5p){%level}: %msg%n</pattern>
+
         </encoder>
     </appender>
 
