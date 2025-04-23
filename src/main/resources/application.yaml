@@ -1,3 +1,5 @@
+server:
+  port: 8082
 spring:
   output:
     ansi:
@@ -5,18 +7,24 @@ spring:
   application:
     name: boot-001
 utilities:
-  user: "jovidio"
-  password: "12345"
+  user1: "jovidio"
+  user2: "nmartinez"
+  user3: "jrivera5"
+  password1: "123456"
+  password2: "123456"
+  password3: "pdv#001"
   licence: "7006169"
-  base_url: "https://testwaf.portaldevehiculos.com/"
-  login_url: "Forms/Account/LoginNew.aspx"
-  home_url: "Default.aspx"
-  preventa_url: "Forms/CarPartialRegistrationBatch.aspx"
-  pdf_route: "C:\\Users\\jgraph\\Desktop\\pdf.pdf"
-  ciclo: "1000"
-  wait_time_out: "60"
-Chrome_driver:
-    path: "./chromedriver-win64/chromedriver-win64/chromedriver.exe"
+  baseUrl: "https://testwaf.portaldevehiculos.com/"
+  loginUrl: "Forms/Account/LoginNew.aspx"
+  homeUrl: "Default.aspx"
+  preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
+  pdfRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/pdfPrueva.pdf"
+  ciclo: "300"
+  usersActives: "3"
+  waitTimeOut: "60"
+chrome:
+  driver:
+    path: "C:/Users/jgraph/Documents/JAVA/boot-001/chromedriver-win64/chromedriver.exe"
 logging:
   level:
     root: INFO

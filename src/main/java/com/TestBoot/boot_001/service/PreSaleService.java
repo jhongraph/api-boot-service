@@ -8,245 +8,249 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 @Service
 @Slf4j
+@Getter
 public class PreSaleService {
+    @Value("${chrome.driver.path}")
+    private String path;
 
-    @Getter
-    private WebDriver driver;
-    private WebDriverWait wait;
+    @Autowired
     private final Env env;
     private final Generators generators;
 
-    @Value("${Chrome_driver.path}")
-    private String path;
+    public WebDriver initDriver(){
+
+        System.setProperty("webdriver.chrome.driver", path);
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--incognito");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--remote-allow-origins=*");
+        // options.addArguments("--headless=new"); // Opcional para modo sin interfaz
+
+        return new ChromeDriver(options);
+    }
+
 
     public PreSaleService(Env env, Generators generators) {
         this.env = env;
         this.generators = generators;
     }
 
-    public void initDriver() {
-        System.setProperty("webdriver.chrome.driver", path);
-        this.driver = new ChromeDriver();
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(env.getWait_time_out()));
-    }
+    public void login(String username, String password, WebDriver driver, WebDriverWait wait) {
 
-    public void login() {
         try {
+            driver.get(env.getBaseUrl() + env.getLoginUrl());
+
             log.info("==============================================");
-            log.info("[STEP 1] STARTING LOGIN PROCESS");
+            log.info("[STEP 1] STARTING LOGIN PROCESS FOR USER: {}", username);
             log.info("[PASO 1] INICIANDO PROCESO DE INICIO DE SESION");
-            log.info("==============================================");
+            log.info("==============================================\n");
 
-            System.setProperty("webdriver.chrome.driver", path);
-            driver.get(env.getBase_url() + env.getLogin_url());
-            log.info("[OK] Navigated to login page: {}", env.getBase_url() + env.getLogin_url());
-            log.info("[OK] Navegado a la página de inicio de sesion");
+            log.info("[OK] Navigated to login page: {}", env.getBaseUrl() + env.getLoginUrl());
+            log.info("[OK] Navegado a la página de inicio de sesion\n");
 
-            WebElement usernameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("LoginUser_UserName")));
+            waitAndType(wait, By.id("LoginUser_UserName"), username);
+            log.info("[OK] Entered username: {}", username);
+            log.info("[OK] Nombre de usuario ingresado\n");
 
-            if (usernameField == null) throw new LoginException("Error: login not present in determinate time");
-
-            log.debug("Field found: {}", usernameField);
-
-            waitAndType(By.id("LoginUser_UserName"), env.getUser());
-            log.info("[OK] Entered username");
-            log.info("[OK] Nombre de usuario ingresado");
-
-            waitAndType(By.id("LoginUser_Password"), env.getPassword());
+            waitAndType(wait, By.id("LoginUser_Password"), password);
             log.info("[OK] Entered password");
-            log.info("[OK] Contraseña ingresada");
+            log.info("[OK] Contraseña ingresada\n");
 
-            waitAndClick(By.className("iniciar-sesin-1"));
+            waitAndClick(wait, By.className("iniciar-sesin-1"));
             log.info("[OK] Submitted login form");
-            log.info("[OK] Formulario de inicio enviado");
+            log.info("[OK] Formulario de inicio enviado\n");
 
-            wait.until(ExpectedConditions.urlContains(env.getHome_url()));
+            wait.until(ExpectedConditions.urlContains(env.getHomeUrl()));
             log.info("[SUCCESS] Login successful");
-            log.info("[SUCCESS] Inicio de sesion exitoso");
+            log.info("[SUCCESS] Inicio de sesion exitoso\n");
 
-            waitAndClick(By.id("MainContent_navMenu_btnCarPartialRegistration"));
+            waitAndClick(wait, By.id("MainContent_navMenu_btnCarPartialRegistration"));
             log.info("[OK] Navigated to car registration section");
             log.info("[OK] Seccion de registro de vehiculos abierta");
 
-            log.info("==============================================");
+            log.info("==============================================\n");
         } catch (TimeoutException | ElementNotFoundException e) {
-            log.error("[ERROR] Failed during login process");
-            if (driver != null) {
-                driver.quit();
-            }
+            log.error("[ERROR] Failed during login process\n");
             throw new SeleniumTimeoutException("Failed during login process");
         } catch (Exception e) {
-            log.error("[ERROR] Login failed");
+            log.error("[ERROR] Login failed\n");
             throw new LoginException("Failed during login process");
         }
     }
 
-    public void fillFormAndContinue() {
+    public void fillFormAndContinue(WebDriver driverParam, WebDriverWait wait) {
         try {
+
             Car car = new Car();
             log.info("==============================================");
             log.info("[STEP 2] FILLING OUT PRE-SALE FORM");
             log.info("[PASO 2] LLENANDO FORMULARIO DE PREVENTA");
-            log.info("==============================================");
+            log.info("==============================================\n");
 
             generators.generateCar(car);
 
-            selectDropdownByValue("MainContent_ddlMySubType", "16");
+            selectDropdownByValue(wait, "MainContent_ddlMySubType", "16");
             log.info("[OK] Selected 'SubType' dropdown option");
-            log.info("[OK] Opcion de 'SubTipo' seleccionada");
+            log.info("[OK] Opcion de 'SubTipo' seleccionada\n");
 
-            waitAndType(By.id("MainContent_txtVIN"), generators.generateVin());
+            String vin = car.getVin();
+
+            waitAndType(wait, By.id("MainContent_txtVIN"), vin);
             log.info("[OK] Entered VIN number");
-            log.info("[OK] Numero VIN ingresado");
+            log.info("[OK] Numero VIN ingresado\n");
 
-            waitAndClick(By.id("MainContent_BtnSearchVIN"));
+            waitAndClick(wait, By.id("MainContent_BtnSearchVIN"));
             log.info("[OK] Submitted VIN search");
-            log.info("[OK] Busqueda de VIN enviada");
+            log.info("[OK] Busqueda de VIN enviada\n");
 
-            WebElement yearInput = driver.findElement(By.id("MainContent_txtYear"));
+            WebElement yearInput = driverParam.findElement(By.id("MainContent_txtYear"));
             yearInput.clear();
             yearInput.sendKeys(String.valueOf(car.getYear()));
             log.info("[OK] Entered year");
-            log.info("[OK] Año ingresado");
+            log.info("[OK] Año ingresado\n");
 
-            waitAndType(By.id("MainContent_txtMake"), "");
-            waitAndType(By.id("MainContent_txtMake"), car.getMake());
+            waitAndType(wait, By.id("MainContent_txtMake"), "");
+            waitAndType(wait, By.id("MainContent_txtMake"), car.getMake());
             log.info("[OK] Entered vehicle make");
-            log.info("[OK] Marca del vehiculo ingresada");
+            log.info("[OK] Marca del vehiculo ingresada\n");
 
-            waitAndType(By.id("MainContent_txtModel"), "");
-            waitAndType(By.id("MainContent_txtModel"), car.getModel());
+            waitAndType(wait, By.id("MainContent_txtModel"), "");
+            waitAndType(wait, By.id("MainContent_txtModel"), car.getModel());
             log.info("[OK] Entered vehicle model");
-            log.info("[OK] Modelo del vehiculo ingresado");
+            log.info("[OK] Modelo del vehiculo ingresado\n");
 
-            wait.until(driver -> !getAttributeValue(By.id("MainContent_txtYear")).isEmpty());
+            wait.until(driver -> !getAttributeValue(driverParam, By.id("MainContent_txtYear")).isEmpty());
             log.info("[OK] VIN search results loaded");
-            log.info("[OK] Resultados de busqueda del VIN cargados");
+            log.info("[OK] Resultados de busqueda del VIN cargados\n");
 
-            generators.insertRandomPlate(driver, wait);
+            generators.insertRandomPlate(driverParam, wait);
             log.info("[OK] Random plate inserted");
-            log.info("[OK] Tablilla aleatoria insertada");
+            log.info("[OK] Tablilla aleatoria insertada\n");
 
-            Select colorDropdown = new Select(driver.findElement(By.id("MainContent_ddlColor1")));
+            Select colorDropdown = new Select(driverParam.findElement(By.id("MainContent_ddlColor1")));
             List<WebElement> options = colorDropdown.getOptions();
             int randomIndex = new Random().nextInt(options.size() - 1) + 1;
             colorDropdown.selectByIndex(randomIndex);
             log.info("[OK] Selected random color");
-            log.info("[OK] Color aleatorio seleccionado");
+            log.info("[OK] Color aleatorio seleccionado\n");
 
-            waitAndType(By.id("MainContent_contracNumber"), generators.generateContractNumber());
+            String contract = generators.generateContractNumber();
+
+            waitAndType(wait, By.id("MainContent_contracNumber"), contract);
             log.info("[OK] Entered contract number");
-            log.info("[OK] Numero de contrato ingresado");
+            log.info("[OK] Numero de contrato ingresado\n");
 
-            waitAndType(By.id("MainContent_txtLicenseNumber"), env.getLicence());
+            waitAndType(wait, By.id("MainContent_txtLicenseNumber"), env.getLicence());
             log.info("[OK] Entered license number");
-            log.info("[OK] Numero de licencia ingresado");
+            log.info("[OK] Numero de licencia ingresado\n");
 
-            generators.selectRandomSaleDate(driver);
+            generators.selectRandomSaleDate(driverParam);
             log.info("[OK] Selected random sale date");
-            log.info("[OK] Fecha de venta aleatoria seleccionada");
+            log.info("[OK] Fecha de venta aleatoria seleccionada\n");
 
-            generators.selectRandomReimbursementDate(driver);
+            generators.selectRandomReimbursementDate(driverParam);
             log.info("[OK] Selected random reimbursement date");
-            log.info("[OK] Fecha de desembolso aleatoria seleccionada");
+            log.info("[OK] Fecha de desembolso aleatoria seleccionada\n");
 
-            waitAndClick(By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
+            waitAndClick(wait, By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
             log.info("[OK] Confirmed pre-sale data");
-            log.info("[OK] Datos de preventa confirmados");
+            log.info("[OK] Datos de preventa confirmados\n");
 
-            waitAndClick(By.id("MainContent_btnConfirmationOwner"));
+            waitAndClick(wait, By.id("MainContent_btnConfirmationOwner"));
             log.info("[OK] Confirmed ownership");
             log.info("[OK] Propiedad confirmada");
 
-            log.info("==============================================");
-        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException | PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Form fill failed");
-            if (driver != null) {
-                driver.quit();
-            }
-            throw new SeleniumTimeoutException("Timeout during operation: ");
+            log.info("------------contract: {},--vin: {}", contract, vin);
+
+            log.info("==============================================\n");
+        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
+                 PdfUploadException | SignatureException e) {
+            log.error("[ERROR] Form fill failed\n");
+            throw new SeleniumTimeoutException("Timeout during operation:");
         } catch (Exception e) {
-            log.error("[ERROR] Form fill failed");
+            log.error("[ERROR] Form fill failed\n");
             throw new FormException("Failed while filling out the form");
         }
     }
 
-    public void performSignatureStep1() {
+    public void performSignatureStep1(WebDriverWait wait) {
         try {
             log.info("==============================================");
             log.info("[STEP 3] PERFORMING SIGNATURE STEP 1");
             log.info("[PASO 3] REALIZANDO FIRMA 1");
-            log.info("==============================================");
+            log.info("==============================================\n");
 
-            waitAndClick(By.id("MainContent_chkConfirmation"));
+            waitAndClick(wait, By.id("MainContent_chkConfirmation"));
             log.info("[OK] Selected first confirmation checkbox");
-            log.info("[OK] Primer checkbox de confirmacion seleccionado");
+            log.info("[OK] Primer checkbox de confirmacion seleccionado\n");
 
-            waitAndClick(By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
+            waitAndClick(wait, By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
             log.info("[OK] Proceeded to next step");
             log.info("[OK] Avanzado al siguiente paso");
 
-            log.info("==============================================");
-        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException | PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Timeout occurred");
-            if (driver != null) {
-                driver.quit();
-            }
+            log.info("==============================================\n");
+        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
+                 PdfUploadException | SignatureException e) {
+            log.error("[ERROR] Timeout occurred\n");
             throw new SignatureException("Timeout during operation: ");
         } catch (Exception e) {
-            log.error("[ERROR] Signature step 1 failed");
+            log.error("[ERROR] Signature step 1 failed\n");
             throw new SignatureException("Error during first signature confirmation");
         }
     }
 
-    public void performSignatureStep2() {
+    public void performSignatureStep2(WebDriverWait wait) {
         try {
             log.info("==============================================");
             log.info("[STEP 4] PERFORMING SIGNATURE STEP 2");
             log.info("[PASO 4] REALIZANDO FIRMA 2");
-            log.info("==============================================");
+            log.info("==============================================\n");
 
-            waitAndClick(By.id("MainContent_CheckBox1"));
+            waitAndClick(wait, By.id("MainContent_CheckBox1"));
             log.info("[OK] Selected second confirmation checkbox");
-            log.info("[OK] Segundo checkbox de confirmacion seleccionado");
+            log.info("[OK] Segundo checkbox de confirmacion seleccionado\n");
 
-            waitAndClick(By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
+            waitAndClick(wait, By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
             log.info("[OK] Proceeded to next step");
             log.info("[OK] Avanzado al siguiente paso");
 
-            log.info("==============================================");
-        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException | PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Timeout occurred");
-            if (driver != null) {
-                driver.quit();
-            }
+            log.info("==============================================\n");
+        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
+                 PdfUploadException | SignatureException e) {
+            log.error("[ERROR] Timeout occurred\n");
             throw new SignatureException("Error during second signature confirmation");
         } catch (Exception e) {
-            log.error("[ERROR] Signature step 2 failed");
+            log.error("[ERROR] Signature step 2 failed\n");
             throw new SignatureException("Error during second signature confirmation");
         }
     }
 
-    public void uploadPdfAndFinish() {
+    public void uploadPdfAndFinish(WebDriverWait wait) {
         try {
             log.info("==============================================");
             log.info("[STEP 5] UPLOADING PDF AND FINALIZING PRE-SALE");
             log.info("[PASO 5] SUBIENDO PDF Y FINALIZANDO PREVENTA");
-            log.info("==============================================");
+            log.info("==============================================\n");
 
             log.info("[INFO] Starting PDF upload...");
             log.info("[INFO] Iniciando carga de PDF...");
@@ -256,38 +260,36 @@ public class PreSaleService {
             WebElement fileInput = wait.until(ExpectedConditions.presenceOfElementLocated(
                     By.cssSelector("input[type='file']")));
 
-            String filePath = env.getPdf_route();
+            String filePath = env.getPdfRoute();
             fileInput.sendKeys(filePath);
 
             WebElement fileNameCell = wait.until(ExpectedConditions.presenceOfElementLocated(
                     By.xpath("//td[normalize-space(text()) != '']")));
             log.info("[OK] PDF uploaded: {}", fileNameCell.getText());
-            log.info("[OK] PDF subido: {}", fileNameCell.getText());
+            log.info("[OK] PDF subido: {}\n", fileNameCell.getText());
 
             Thread.sleep(2000);
 
-            waitAndClick(By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
+            waitAndClick(wait, By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
             log.info("[OK] Proceeded to final confirmation");
-            log.info("[OK] Avanzado a la confirmacion final");
+            log.info("[OK] Avanzado a la confirmacion final\n");
 
-            waitAndClick(By.id("MainContent_btnYes"));
+            waitAndClick(wait, By.id("MainContent_btnYes"));
             log.info("[OK] Pre-sale finalized");
             log.info("[OK] Preventa finalizada");
 
-            log.info("==============================================");
-        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException | PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Timeout occurred: {}", e.getMessage());
-            if (driver != null) {
-                driver.quit();
-            }
+            log.info("==============================================\n");
+        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
+                 PdfUploadException | SignatureException e) {
+            log.error("[ERROR] Timeout occurred: {}\n", e.getClass().getSimpleName());
             throw new PdfUploadException("error about upload pdf");
         } catch (Exception e) {
-            log.error("[ERROR] Unexpected error uploading PDF");
+            log.error("[ERROR] Unexpected error uploading PDF\n");
             throw new PdfUploadException("Unexpected error during PDF upload");
         }
     }
 
-    private void waitAndType(By locator, String value) {
+    private void waitAndType(WebDriverWait wait, By locator, String value) {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(locator)).sendKeys(value);
         } catch (Exception e) {
@@ -295,7 +297,7 @@ public class PreSaleService {
         }
     }
 
-    private void waitAndClick(By locator) {
+    private void waitAndClick(WebDriverWait wait, By locator) {
         try {
             wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
         } catch (Exception e) {
@@ -303,7 +305,7 @@ public class PreSaleService {
         }
     }
 
-    private void selectDropdownByValue(String selectId, String value) {
+    private void selectDropdownByValue(WebDriverWait wait, String selectId, String value) {
         try {
             WebElement dropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectId)));
             new Select(dropdown).selectByValue(value);
@@ -312,7 +314,7 @@ public class PreSaleService {
         }
     }
 
-    private String getAttributeValue(By locator) {
+    private String getAttributeValue(WebDriver driver, By locator) {
         try {
             return Objects.requireNonNull(driver.findElement(locator).getAttribute("value"));
         } catch (Exception e) {
@@ -320,45 +322,71 @@ public class PreSaleService {
         }
     }
 
-    public void runFullPreSaleProcess() {
-        try {
-            login();
-            log.info("[OK] Login successful");
-            log.info("[OK] Inicio de sesion exitoso");
 
-            int zero = 1;
-            int condition = env.getCiclo();
+    @Async("taskExecutor")
+    public void runFullPreSaleProcess(String username, String password, CountDownLatch latch, WebDriver driver, WebDriverWait wait) {
+        int maxAttempts = 3;
+        int attempt = 0;
+        boolean success = false;
 
-            while (zero <= condition) {
-                fillFormAndContinue();
-                log.info("[OK] Pre-sale form filled out");
-                log.info("[OK] Formulario de preventa completado");
+        while (attempt < maxAttempts && !success) {
+            try {
 
-                performSignatureStep1();
-                log.info("[OK] First signature completed");
-                log.info("[OK] Primera firma completada");
+                login(username, password, driver, wait);
+                log.info("[OK] Login successful");
+                log.info("[OK] Inicio de sesion exitoso\n");
 
-                performSignatureStep2();
-                log.info("[OK] Second signature completed");
-                log.info("[OK] Segunda firma completada");
+                int zero = 1;
+                int condition = env.getCiclo();
 
-                uploadPdfAndFinish();
-                log.info("[SUCCESS] PDF uploaded and pre-sale finalized");
-                log.info("[SUCCESS] PDF subido y preventa finalizada");
+                while (zero <= condition) {
+                    fillFormAndContinue(driver, wait);
+                    log.info("[OK] Pre-sale form filled out");
+                    log.info("[OK] Formulario de preventa completado\n");
 
-                log.info("==============================================");
-                zero += 1;
+                    performSignatureStep1(wait);
+                    log.info("[OK] First signature completed");
+                    log.info("[OK] Primera firma completada\n");
+
+                    performSignatureStep2(wait);
+                    log.info("[OK] Second signature completed");
+                    log.info("[OK] Segunda firma completada\n");
+
+                    uploadPdfAndFinish(wait);
+                    log.info("[SUCCESS] PDF uploaded and pre-sale finalized");
+                    log.info("[SUCCESS] PDF subido y preventa finalizada");
+
+                    log.info("==============================================\n");
+                    zero += 1;
+                    attempt = 0;
+                    success = true;
+                }
+
+
+
+            } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
+                     PdfUploadException | SignatureException e) {
+                log.error("[ERROR]  occurred: {}\n", e.getClass().getSimpleName());
+                attempt += 1;
+                log.error("[ERROR] Attempt {} failed | Intento {} fallido\n", attempt, attempt);
+
+                if (attempt < maxAttempts) {
+                    log.info("[RETRY] Retrying... | Reintentando...\n");
+
+                } else {
+                    log.error("[FAIL] Max retries reached | Se agotaron los reintentos. Abortando...\n");
+                }
+
+            } catch (Exception e) {
+                log.error("[CRITICAL] CRITICAL ERROR - FORCING SHUTDOWN | ERROR CRITICO - FORZANDO CIERRE /ERROR: {}\n", e.getMessage());
+                System.exit(1);
             }
 
-        } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException | PdfUploadException | SignatureException e) {
-            log.error("[ERROR]  occurred: {}", e.getClass().getSimpleName());
-            driver.quit();
-            throw new SeleniumTimeoutException("error diring init app", e);
+        }
 
-        } catch (Exception e) {
-            driver.quit();
-            log.error("[ERROR] Unexpected error in full process: {}", e.getClass().getSimpleName());
-            throw new PreSaleException("Unexpected error during full pre-sale process", e);
+        if (success) {
+            log.info("[COMPLETED] Full pre-sale process completed | Proceso de preventa completado exitosamente");
+            log.info("==============================================\n");
         }
     }
 
@@ -367,44 +395,80 @@ public class PreSaleService {
     public static class AppRunner implements CommandLineRunner {
 
         @Autowired
-        private PreSaleService preSaleService;
-
+        private  Env env;
         @Autowired
-        private ApplicationContext context;
+        private PreSaleService preSaleService;
 
         @Override
         public void run(String... args) {
-            int maxAttempts = 3;
-            int attempt = 0;
-            boolean success = false;
 
-            while (attempt < maxAttempts && !success) {
+
+
+            WebDriver driver1 = null;
+            WebDriver driver2 = null;
+            WebDriver driver3 = null;
+
+            if(env.getUsersActives() == 1){
+                driver1 = preSaleService.initDriver();
+            }
+
+            if(env.getUsersActives() == 2){
+                driver1 = preSaleService.initDriver();
+                driver2 = preSaleService.initDriver();
+            }
+
+            if(env.getUsersActives() == 3){
+                driver1 = preSaleService.initDriver();
+                driver2 = preSaleService.initDriver();
+                driver3 = preSaleService.initDriver();
+            }
+
+            WebDriverWait wait1 = new WebDriverWait(driver1, Duration.ofSeconds(env.getWaitTimeOut()));
+            WebDriverWait wait2 = new WebDriverWait(driver2, Duration.ofSeconds(env.getWaitTimeOut()));
+            WebDriverWait wait3 = new WebDriverWait(driver3, Duration.ofSeconds(env.getWaitTimeOut()));
+
                 try {
-                    preSaleService.initDriver();
-                    preSaleService.runFullPreSaleProcess();
-                    success = true;
-                } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException | PdfUploadException | SignatureException e) {
-                    attempt += 1;
-                    log.error("[ERROR] Attempt {} failed | Intento {} fallido", attempt, attempt);
+                    CountDownLatch latch = new CountDownLatch(2);
 
-                    if (attempt < maxAttempts) {
-                        log.info("[RETRY] Retrying... | Reintentando...");
-                        preSaleService.getDriver().quit();
-                    } else {
-                        log.error("[FAIL] Max retries reached | Se agotaron los reintentos. Abortando...");
+                    log.info("=========================================");
+                    log.info("       Starting users works");
+                    log.info("=========================================");
+
+                    if(env.getUsersActives() == 1){
+                        preSaleService.runFullPreSaleProcess(env.getUser1(),
+                                env.getPassword1(), latch, driver1, wait1 );
                     }
 
-                } catch (Exception e) {
-                    log.error("[CRITICAL] CRITICAL ERROR - FORCING SHUTDOWN | ERROR CRITICO - FORZANDO CIERRE", e);
+                    if(env.getUsersActives() == 2){
+                        preSaleService.runFullPreSaleProcess(env.getUser1(),
+                                env.getPassword1(), latch, driver1, wait1 );
+
+                        preSaleService.runFullPreSaleProcess(env.getUser2(),
+                                env.getPassword2(), latch, driver2, wait2 );
+                    }
+
+                    if(env.getUsersActives() == 3){
+                        preSaleService.runFullPreSaleProcess(env.getUser1(),
+                                env.getPassword1(), latch, driver1, wait1 );
+
+                        preSaleService.runFullPreSaleProcess(env.getUser2(),
+                                env.getPassword2(), latch, driver2, wait2 );
+
+                        preSaleService.runFullPreSaleProcess(env.getUser3(),
+                                env.getPassword3(), latch, driver3, wait3 );
+                    }
+
+                    latch.await();
+
+                    log.info("=========================================");
+                    log.info("         All process finished ");
+                    log.info("=========================================");
+
+                }  catch (Exception e) {
+                    log.error("ERROR IN FULL PROCESS: {}", e.getClass().getSimpleName());
+                    throw new PreSaleException("error: ", e);
+
                 }
-            }
-
-            if (success) {
-                log.info("[COMPLETED] Full pre-sale process completed | Proceso de preventa completado exitosamente");
-                log.info("==============================================");
-            }
-            preSaleService.getDriver().quit();
-
             System.exit(1);
         }
 
