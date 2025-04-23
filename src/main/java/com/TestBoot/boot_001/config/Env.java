@@ -23,6 +23,8 @@ public class Env {
     private  String homeUrl;
     private  String preventaUrl;
     private String pdfRoute;
+    private String GeneratorVinkey;
+    private String concesionario;
     private int ciclo;
     private int waitTimeOut;
     private int usersActives;

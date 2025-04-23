@@ -13,6 +13,7 @@ utilities:
   password1: "123456"
   password2: "123456"
   password3: "pdv#001"
+  concesionario: "SJ2124"
   licence: "7006169"
   baseUrl: "https://testwaf.portaldevehiculos.com/"
   loginUrl: "Forms/Account/LoginNew.aspx"
@@ -20,11 +21,15 @@ utilities:
   preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
   pdfRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/pdfPrueva.pdf"
   ciclo: "300"
-  usersActives: "3"
+  usersActives: "1"
   waitTimeOut: "60"
+  GeneratorVinkey: "rRnChorlYRs0ivczHyvjCQ==7zWRkgEyxSpfiBlr"
 chrome:
   driver:
     path: "C:/Users/jgraph/Documents/JAVA/boot-001/chromedriver-win64/chromedriver.exe"
+    api:
+      ninjas:
+
 logging:
   level:
     root: INFO
