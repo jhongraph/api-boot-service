@@ -4,7 +4,6 @@ import com.TestBoot.boot_001.config.Env;
 import com.TestBoot.boot_001.exception.*;
 import com.TestBoot.boot_001.pojos.Car;
 import com.TestBoot.boot_001.utils.Generators;
-import com.TestBoot.boot_001.utils.VinFileHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
@@ -24,6 +23,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 @Service
@@ -47,7 +47,9 @@ public class PreSaleService {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--remote-allow-origins=*");
-        // options.addArguments("--headless=new"); // Opcional para modo sin interfaz
+        options.addArguments("--headless=new");
+        options.addArguments("--user-data-dir=/tmp/chrome-profile-" + UUID.randomUUID());
+
 
         return new ChromeDriver(options);
     }
@@ -57,10 +59,6 @@ public class PreSaleService {
         this.env = env;
         this.generators = generators;
     }
-
-
-
-
 
     public void login(String username, String password, WebDriver driver, WebDriverWait wait) {
 
@@ -75,14 +73,22 @@ public class PreSaleService {
 
             wait.until(ExpectedConditions.urlContains(env.getHomeUrl()));
 
+            List<WebElement> bottons = driver.findElements(By.id("ucTermsConditions_btnSubmit"));
+            if (!bottons.isEmpty() && bottons.getFirst().isDisplayed()) {
+                waitAndClick(wait, By.id("ucTermsConditions_gvTermConditionsBullets_chkChecked_0"));
+                waitAndClick(wait, By.id("ucTermsConditions_gvTermConditionsBullets_chkChecked_1"));
+                waitAndClick(wait, By.id("ucTermsConditions_gvTermConditionsBullets_chkChecked_2"));
+                waitAndClick(wait, By.id("ucTermsConditions_gvTermConditionsBullets_chkChecked_3"));
+                waitAndClick(wait, By.id("ucTermsConditions_btnSubmit"));
+            }
+
             waitAndClick(wait, By.id("MainContent_navMenu_btnCarPartialRegistration"));
 
-        } catch (TimeoutException | ElementNotFoundException e) {
-            log.error("[ERROR] Failed during login process\n");
-            throw new SeleniumTimeoutException("Failed during login process");
+        } catch (TimeoutException | ElementNotFoundException | SeleniumTimeoutException | FormException |
+                 LoginException | PdfUploadException |SignatureException e) {
+            throw new LoginException("Error: " + e, e);
         } catch (Exception e) {
-            log.error("[ERROR] Login failed\n");
-            throw new LoginException("Failed during login process");
+            throw new LoginException("Falla durante proceso de de login: " + e, e);
         } finally {
             MDC.clear();
         }
@@ -96,11 +102,14 @@ public class PreSaleService {
 
             selectDropdownByValue(wait, "MainContent_ddlMySubType", "16");
 
+            car.setVin(generators.generateVin());
+
             waitAndType(wait, By.id("MainContent_txtVIN"), car.getVin());
 
             waitAndClick(wait, By.id("MainContent_BtnSearchVIN"));
 
-            WebElement yearInput = driverParam.findElement(By.id("MainContent_txtYear"));
+            WebElement yearInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("MainContent_txtYear")));
+
 
             if (yearInput.getAttribute("value").isEmpty()) {
                 yearInput.sendKeys(String.valueOf(car.getYear()));
@@ -138,6 +147,8 @@ public class PreSaleService {
 
             generators.selectRandomReimbursementDate(driverParam);
 
+            if(Objects.equals(env.getMode(), "test")){
+
             waitAndType(wait, By.id("MainContent_txtLicense"), env.getConcesionario());
             waitAndClick(wait, By.id("MainContent_BtnSearchLicense"));
 
@@ -150,7 +161,9 @@ public class PreSaleService {
             if ((dealerName == null || dealerName.trim().isEmpty()) ||
                     (licenseDate == null || licenseDate.trim().isEmpty())) {
 
-                throw new FormException("valores de licencia de dealer null ");
+                throw new FormException("valores de licencia de dealer null: ");
+            }
+
             }
 
             waitAndClick(wait, By.id("PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"));
@@ -159,11 +172,9 @@ public class PreSaleService {
 
         } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
                  PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Form fill failed\n");
-            throw new FormException("Error durante llenado de formulario: " + e.getClass().getSimpleName());
+            throw new FormException("Error: " + e.getMessage());
         } catch (Exception e) {
-            log.error("[ERROR] Form fill failed\n{}", e.getMessage());
-            throw new FormException("Failed while filling out the form" );
+            throw new FormException("falla al momento de autorrellenar formulario pre-venta: " + e.getMessage() );
         }
     }
 
@@ -176,11 +187,9 @@ public class PreSaleService {
 
         } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
                  PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Timeout occurred\n");
-            throw new SignatureException("Timeout during operation: ");
+            throw new SignatureException("Error: " + e.getMessage());
         } catch (Exception e) {
-            log.error("[ERROR] Signature step 1 failed\n");
-            throw new SignatureException("Error during first signature confirmation");
+            throw new SignatureException("Error durante la primera firma digital: " + e.getMessage());
         }
     }
 
@@ -192,11 +201,9 @@ public class PreSaleService {
 
         } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
                  PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Timeout occurred\n");
-            throw new SignatureException("Error during second signature confirmation");
+            throw new SignatureException("Error: " + e.getMessage());
         } catch (Exception e) {
-            log.error("[ERROR] Signature step 2 failed\n");
-            throw new SignatureException("Error during second signature confirmation");
+            throw new SignatureException("Error durante la segunda firma digital: " + e.getMessage());
         }
     }
 
@@ -222,11 +229,9 @@ public class PreSaleService {
 
         } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
                  PdfUploadException | SignatureException e) {
-            log.error("[ERROR] Timeout occurred: {}\n", e.getClass().getSimpleName());
-            throw new PdfUploadException("error about upload pdf");
+            throw new PdfUploadException("Error inesperado al cargar pdf: " + e.getMessage());
         } catch (Exception e) {
-            log.error("[ERROR] Unexpected error uploading PDF\n");
-            throw new PdfUploadException("Unexpected error during PDF upload");
+            throw new PdfUploadException("Error : " +e.getMessage());
         }
     }
 
@@ -234,7 +239,7 @@ public class PreSaleService {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(locator)).sendKeys(value);
         } catch (Exception e) {
-            throw new ElementNotFoundException("Unable to type into element: " + locator, e);
+            throw new ElementNotFoundException("Elemento no disponible para escribir: " + locator, e);
         }
     }
 
@@ -242,7 +247,7 @@ public class PreSaleService {
         try {
             wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
         } catch (Exception e) {
-            throw new ElementNotFoundException("Unable to click element: " + locator, e);
+            throw new ElementNotFoundException("Elemento no disponible para clicar: " + locator, e);
         }
     }
 
@@ -251,7 +256,7 @@ public class PreSaleService {
             WebElement dropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(selectId)));
             new Select(dropdown).selectByValue(value);
         } catch (Exception e) {
-            throw new ElementNotFoundException("Unable to select dropdown value: " + value, e);
+            throw new ElementNotFoundException("No se pudo seleccionar el valor en el desplegable" + value, e);
         }
     }
 
@@ -259,26 +264,30 @@ public class PreSaleService {
         try {
             return Objects.requireNonNull(driver.findElement(locator).getAttribute("value"));
         } catch (Exception e) {
-            throw new ElementNotFoundException("Unable to get attribute value for element: " + locator, e);
+            throw new ElementNotFoundException("No se pudo obtener el valor del atributo para el elemento: " + locator, e);
         }
     }
-
 
     @Async("taskExecutor")
     public void runFullPreSaleProcess(String username, String password, CountDownLatch latch, WebDriver driver, WebDriverWait wait) {
         int createdCases = 0;
-        int maxAttempts = 3;
-        int attempt = 0;
-        boolean success = false;
 
-        while (attempt < maxAttempts && !success) {
-            try {
-                login(username, password, driver, wait);
 
-                int zero = 1;
-                int condition = env.getCiclo();
 
-                while (zero <= condition) {
+        int zero = 1;
+        int condition = env.getCiclo();
+
+
+        while (zero <= condition) {
+            try{
+
+            login(username, password, driver, wait);
+
+            boolean success = true;
+
+            while (success) {
+                try {
+
                     fillFormAndContinue(driver, wait);
 
                     performSignatureStep1(wait);
@@ -288,32 +297,33 @@ public class PreSaleService {
                     uploadPdfAndFinish(wait);
 
                     zero += 1;
-                    attempt = 0;
-                    success = true;
-                        createdCases += 1;
-                        log.info("[COMPLETED CASE NO. {}] Full pre-sale process completed | Proceso de preventa completado exitosamente", createdCases);
-                }
-            } catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
-                     PdfUploadException | SignatureException e) {
-                log.error("[ERROR]  occurred: {}\n", e.getMessage());
-                attempt += 1;
-                log.error("[ERROR] Attempt {} failed | Intento {} fallido\n", attempt, attempt);
+                    createdCases += 1;
 
-                if (attempt < maxAttempts) {
-                    log.info("[RETRY] Retrying... | Reintentando...\n");
-                } else {
-                    log.error("[FAIL] Max retries reached | Se agotaron los reintentos. Abortando...\n");
+                    log.info("[COMPLETED CASE NO. {}]  Proceso de preventa completado exitosamente", createdCases);
+
+                } catch (Exception e) {
+                    log.error("{}\n", e.getMessage());
+                  success = false;
+
+
                 }
-            } catch (Exception e) {
-                log.error("[CRITICAL] CRITICAL ERROR - FORCING SHUTDOWN | ERROR CRITICO - FORZANDO CIERRE /ERROR: {}\n", e.getMessage());
-                System.exit(1);
             }
 
-        }
+
+            }  catch (TimeoutException | ElementNotFoundException | FormException | SeleniumTimeoutException |
+                       PdfUploadException | SignatureException e) {
+                log.error("[ERROR]  occurred: {}\n", e.getClass().getSimpleName());
+
+            }catch (Exception e){
+                log.error("" + e);
+            }
+
 
 
 
     }
+    }
+
 
     @Component
     @Slf4j
@@ -332,6 +342,7 @@ public class PreSaleService {
             WebDriver driver1 = null;
             WebDriver driver2 = null;
             WebDriver driver3 = null;
+            WebDriver driver4 = null;
 
             if(env.getUsersActives() == 1){
                 driver1 = preSaleService.initDriver();
@@ -348,12 +359,21 @@ public class PreSaleService {
                 driver3 = preSaleService.initDriver();
             }
 
+            if(env.getUsersActives() == 4){
+                driver1 = preSaleService.initDriver();
+                driver2 = preSaleService.initDriver();
+                driver3 = preSaleService.initDriver();
+                driver4 = preSaleService.initDriver();
+            }
+
             WebDriverWait wait1 = new WebDriverWait(driver1, Duration.ofSeconds(env.getWaitTimeOut()));
             WebDriverWait wait2 = new WebDriverWait(driver2, Duration.ofSeconds(env.getWaitTimeOut()));
             WebDriverWait wait3 = new WebDriverWait(driver3, Duration.ofSeconds(env.getWaitTimeOut()));
+            WebDriverWait wait4 = new WebDriverWait(driver4, Duration.ofSeconds(env.getWaitTimeOut()));
+
 
                 try {
-                    CountDownLatch latch = new CountDownLatch(2);
+                    CountDownLatch latch = new CountDownLatch(env.getUsersActives());;
 
                     if(env.getUsersActives() == 1){
                         preSaleService.runFullPreSaleProcess(env.getUser1(),
@@ -376,12 +396,23 @@ public class PreSaleService {
                         preSaleService.runFullPreSaleProcess(env.getUser3(),
                                 env.getPassword3(), latch, driver3, wait3 );
                     }
+                    if(env.getUsersActives() == 4){
+                        preSaleService.runFullPreSaleProcess(env.getUser1(),
+                                env.getPassword1(), latch, driver1, wait1 );
+
+                        preSaleService.runFullPreSaleProcess(env.getUser2(),
+                                env.getPassword2(), latch, driver2, wait2 );
+
+                        preSaleService.runFullPreSaleProcess(env.getUser3(),
+                                env.getPassword3(), latch, driver3, wait3 );
+
+                        preSaleService.runFullPreSaleProcess(env.getUser4(),
+                                env.getPassword4(), latch, driver4, wait4 );
+                    }
                     latch.await();
 
                 }  catch (Exception e) {
                     log.error("ERROR IN FULL PROCESS: {}", e.getClass().getSimpleName());
-                    throw new PreSaleException("error: ", e);
-
                 }
             System.exit(1);
         }

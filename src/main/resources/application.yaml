@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8080
 spring:
   output:
     ansi:
@@ -10,23 +10,26 @@ utilities:
   user1: "jovidio"
   user2: "nmartinez"
   user3: "jrivera5"
+  user4: "ccartagena33057"
   password1: "123456"
   password2: "123456"
-  password3: "pdv#001"
+  password3: "Pdv#001"
+  password4: "Pdv#001"
   concesionario: "SJ2124"
   licence: "7006169"
-  baseUrl: "https://testwaf.portaldevehiculos.com/"
+  mode: "prod"
+  baseUrl: "https://pdvprod-preprod.azurewebsites.net/"
   loginUrl: "Forms/Account/LoginNew.aspx"
   homeUrl: "Default.aspx"
   preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
-  pdfRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/pdfPrueva.pdf"
+  pdfRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/utilities/pdfPrueva.pdf"
   ciclo: "300"
-  usersActives: "1"
+  usersActives: "4"
   waitTimeOut: "60"
-  GeneratorVinkey: "rRnChorlYRs0ivczHyvjCQ==7zWRkgEyxSpfiBlr"
+  vinBanckRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/utilities/Vins.txt"
 chrome:
   driver:
-    path: "C:/Users/jgraph/Documents/JAVA/boot-001/chromedriver-win64/chromedriver.exe"
+    path: "C:/Users/jgraph/Documents/JAVA/boot-001/utilities/chromedriver-win64/chromedriver.exe"
     api:
       ninjas:
 

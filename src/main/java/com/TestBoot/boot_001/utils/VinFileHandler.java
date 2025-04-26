@@ -1,6 +1,9 @@
 package com.TestBoot.boot_001.utils;
 
+import com.TestBoot.boot_001.config.Env;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -11,12 +14,22 @@ import java.util.List;
 @Component
 public class VinFileHandler {
 
-    private static final String VIN_FILE_PATH = "C:\\Users\\jgraph\\Documents\\JAVA\\boot-001\\Vins.txt";
+    Env env;
+
+
+    @Autowired
+    public VinFileHandler(Env env) {
+        this.env = env;
+    }
+
     private static final int VIN_THRESHOLD = 100;
 
     public String obtenerYConsumirVin() {
         try {
-            Path path = Paths.get(VIN_FILE_PATH);
+
+
+
+            Path path = Paths.get(env.getVinBanckRoute());
 
             // Leer todas las líneas del archivo
             List<String> lines = Files.readAllLines(path);

@@ -164,12 +164,10 @@ public class Generators {
     }
 
     public void generateCar(Car car){
-        String vin  = generateVin();
         String year = generateYear();
         String make = generateMake();
         String model = generateModel(make);
 
-        car.setVin(vin);
         car.setYear(year);
         car.setMake(make);
         car.setModel(model);
