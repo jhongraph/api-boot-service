@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Random;
 
 @Slf4j
+@NoArgsConstructor
 public class Generators {
 
     private  VinFileHandler vinFileHandler;
@@ -50,12 +51,10 @@ public class Generators {
         return prefix + year + randomPart;
     }
 
-    public void selectRandomSaleDate(WebDriver driver) {
+    public String selectRandomSaleDate(WebDriver driver) {
 
-        WebElement fechaInput = driver.findElement(By.id("MainContent_SaleDate"));
-
-        LocalDate fechaActual = LocalDate.now();
-        int añoAnterior = fechaActual.getYear() - 1;
+        LocalDate actualDate = LocalDate.now();
+        int beforeYear = actualDate.getYear() - 1;
         Random random = new Random();
 
         int mes = random.nextInt(12) + 1;
@@ -70,18 +69,15 @@ public class Generators {
             dia = random.nextInt(31) + 1;
         }
 
-        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, añoAnterior);
+        return String.format("%02d/%02d/%d", dia, mes, beforeYear);
 
-        fechaInput.clear();
-        fechaInput.sendKeys(fechaGenerada);
     }
 
-    public void selectRandomReimbursementDate(WebDriver driver) {
+    public String selectRandomReimbursementDate(WebDriver driver) {
 
-        WebElement fechaInput = driver.findElement(By.name("ctl00$MainContent$DisbursementDate"));
 
-        LocalDate fechaActual = LocalDate.now();
-        int añoAnterior = fechaActual.getYear() - 1;
+        LocalDate actualDate = LocalDate.now();
+        int añoAnterior = actualDate.getYear() - 1;
         Random random = new Random();
 
         int mes = random.nextInt(12) + 1;
@@ -95,36 +91,31 @@ public class Generators {
             dia = random.nextInt(31) + 1;
         }
 
-        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, añoAnterior);
+        return String.format("%02d/%02d/%d", dia, mes, añoAnterior);
 
-        fechaInput.clear();
-        fechaInput.sendKeys(fechaGenerada);
+
     }
 
-    public void insertRandomPlate(WebDriver driver, WebDriverWait wait) {
-        WebElement placaInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.id("MainContent_txtPlateNumber")));
+    public String insertRandomPlate(WebDriver driver, WebDriverWait wait) {
 
-        String letras = generateLetters(3);
+        String letters = generateLetters(3);
 
-        String numeros = String.format("%03d", new Random().nextInt(1000));
+        String numbers = String.format("%03d", new Random().nextInt(1000));
 
-        String placa = letras + numeros;
+        return letters + numbers;
 
-        placaInput.clear();
-        placaInput.sendKeys(placa);
     }
 
     private String generateLetters(int cantidad) {
         Random random = new Random();
-        StringBuilder letras = new StringBuilder();
+        StringBuilder letters = new StringBuilder();
 
         for (int i = 0; i < cantidad; i++) {
             char letra = (char) ('A' + random.nextInt(26));
-            letras.append(letra);
+            letters.append(letra);
         }
 
-        return letras.toString();
+        return letters.toString();
     }
 
     public String generateYear(){

@@ -18,7 +18,7 @@ utilities:
   concesionario: "SJ2124"
   licence: "7006169"
   mode: "prod"
-  baseUrl: "https://pdvprod-preprod.azurewebsites.net/"
+  baseUrl: "https://testwaf.portaldevehiculos.com/"
   loginUrl: "Forms/Account/LoginNew.aspx"
   homeUrl: "Default.aspx"
   preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
