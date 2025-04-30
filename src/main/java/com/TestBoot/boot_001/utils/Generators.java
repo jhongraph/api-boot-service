@@ -1,6 +1,8 @@
 package com.TestBoot.boot_001.utils;
 
 import com.TestBoot.boot_001.pojos.Car;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -8,6 +10,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,8 +19,11 @@ import java.util.Random;
 @Slf4j
 public class Generators {
 
-    // Selects a random color from a dropdown list.
-    // Selecciona un color aleatorio de una lista desplegable.
+    private  VinFileHandler vinFileHandler;
+
+    public Generators(VinFileHandler vinFileHandler) {
+        this.vinFileHandler = vinFileHandler;
+    }
     public void selectRandomColor(WebDriver driver) {
         WebElement colorSelectElement = driver.findElement(By.id("MainContent_ddlColor1"));
         Select colorSelect = new Select(colorSelectElement);
@@ -32,22 +38,15 @@ public class Generators {
         log.info("Color seleccionado aleatoriamente: {}", opcionAleatoria.getText());
     }
 
-    // Generates a random 17-character VIN (Vehicle Identification Number).
-    // Genera un VIN (Número de Identificación de Vehículo) aleatorio de 17 caracteres.
     public String generateVin() {
-        StringBuilder vin = new StringBuilder();
-        String VIN_CHARS = "ABCDEFGHJKLMNPRSTUVWXYZ0123456789";
-        Random random = new Random();
-
-        for (int i = 0; i < 17; i++) {
-            vin.append(VIN_CHARS.charAt(random.nextInt(VIN_CHARS.length())));
-        }
-
-        return vin.toString();
+        return  vinFileHandler.obtenerYConsumirVin();
     }
 
-    // Generates a random contract number based on a specific pattern.
-    // Genera un número de contrato aleatorio basado en un patrón específico.
+
+    public boolean reInsertVin(String vin) {
+        return  vinFileHandler.insertarVin(vin);
+    }
+
     public String generateContractNumber() {
         String prefix = "102";
         String year = "002";
@@ -56,8 +55,6 @@ public class Generators {
         return prefix + year + randomPart;
     }
 
-    // Selects a random sale date from the previous year and inputs it.
-    // Selecciona una fecha de venta aleatoria del año anterior e ingresarla.
     public void selectRandomSaleDate(WebDriver driver) {
 
         WebElement fechaInput = driver.findElement(By.id("MainContent_SaleDate"));
@@ -84,8 +81,6 @@ public class Generators {
         fechaInput.sendKeys(fechaGenerada);
     }
 
-    // Selects a random reimbursement date from the previous year and inputs it.
-    // Selecciona una fecha de reembolso aleatoria del año anterior e ingresarla.
     public void selectRandomReimbursementDate(WebDriver driver) {
 
         WebElement fechaInput = driver.findElement(By.name("ctl00$MainContent$DisbursementDate"));
@@ -111,8 +106,6 @@ public class Generators {
         fechaInput.sendKeys(fechaGenerada);
     }
 
-    // Inserts a random plate number into the respective input field.
-    // Inserta un número de placa aleatorio en el campo de entrada respectivo.
     public void insertRandomPlate(WebDriver driver, WebDriverWait wait) {
         WebElement placaInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.id("MainContent_txtPlateNumber")));
@@ -127,8 +120,6 @@ public class Generators {
         placaInput.sendKeys(placa);
     }
 
-    // Generates a string of random letters of a specified length.
-    // Genera una cadena de letras aleatorias de una longitud específica.
     private String generateLetters(int cantidad) {
         Random random = new Random();
         StringBuilder letras = new StringBuilder();
@@ -141,21 +132,15 @@ public class Generators {
         return letras.toString();
     }
 
-    // Generates a random year within a two-year range from the current year.
-    // Genera un año aleatorio dentro de un rango de dos años desde el año actual.
     public String generateYear(){
         int currentYear = LocalDate.now().getYear();
         int minYear = currentYear - 2;
 
         Random random = new Random();
         int randomYear = random.nextInt(currentYear - minYear + 1) + minYear;
-        log.info(String.valueOf(randomYear));
-
         return String.valueOf(randomYear);
     }
 
-    // Generates a random make (brand) for a car.
-    // Genera una marca (make) aleatoria para un coche.
     public String generateMake() {
         String[] brands = {"TOYOTA", "LEXUS", "KIA", "HYUNDAI"};
 
@@ -165,9 +150,6 @@ public class Generators {
 
         return brands[randomIndex];
     }
-
-    // Generates a random model based on the car make.
-    // Genera un modelo aleatorio basado en la marca del coche.
     public String generateModel(String make) {
         Random random = new Random();
 
@@ -186,15 +168,11 @@ public class Generators {
         return "Marca no encontrada.";
     }
 
-    // Generates a car object with random details.
-    // Genera un objeto Car con detalles aleatorios.
     public void generateCar(Car car){
-        String vin  = generateVin();
         String year = generateYear();
         String make = generateMake();
         String model = generateModel(make);
 
-        car.setVin(vin);
         car.setYear(year);
         car.setMake(make);
         car.setModel(model);

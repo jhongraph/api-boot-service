@@ -11,14 +11,25 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "utilities")
 public class Env {
 
-    private String user;
-    private String password;
+    private String user1;
+    private String user2;
+    private String user3;
+    private String user4;
+    private String password1;
+    private String password2;
+    private String password3;
+    private String password4;
     private String licence;
-    private String base_url;
-    private String login_url;
-    private  String home_url;
-    private  String preventa_url;
-    private String pdf_route;
+    private String baseUrl;
+    private String loginUrl;
+    private  String homeUrl;
+    private  String preventaUrl;
+    private String pdfRoute;
+    private String GeneratorVinkey;
+    private String concesionario;
+    private String vinBanckRoute;
+    private String mode;
     private int ciclo;
-    private int wait_time_out;
+    private int waitTimeOut;
+    private int usersActives;
 }
