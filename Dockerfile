@@ -34,20 +34,16 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     ca-certificates \
     apt-transport-https
-# Agrega la clave GPG para Google Chrome
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-linux-signing.gpg
-# Agrega el repositorio de Chrome estable
-RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-linux-signing.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-    > /etc/apt/sources.list.d/google-chrome.list
-# Instala Chrome estable
-RUN apt-get update && apt-get install -y google-chrome-stable
+
 # Crea un directorio de trabajo dentro del contenedor
 WORKDIR /app
 # Copia el JAR desde tu sistema al contenedor
 COPY target/boot-001-0.0.1-SNAPSHOT.jar app.jar
 
 COPY . /app
+
+#instalar chrome
+RUN apt install -y /app/utilities/google-chrome-stable_current_amd64.deb
 
 EXPOSE 8080
 

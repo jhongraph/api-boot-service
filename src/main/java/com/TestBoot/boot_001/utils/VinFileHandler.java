@@ -37,11 +37,11 @@ public class VinFileHandler {
             List<String> remaining = lines.subList(1, lines.size());
             Files.write(path, remaining, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 
-            if (remaining.size() < 500) {
+            if (remaining.size() < 500 && remaining.size() > 249) {
                 log.warn("Quedan menos de 500 VINs en el archivo: {}", remaining.size());
             }
 
-            if (remaining.size() < 250) {
+            if (remaining.size() < 250 && remaining.size() > 99) {
                 log.warn("Quedan menos de 250 VINs en el archivo: {}", remaining.size());
             }
 

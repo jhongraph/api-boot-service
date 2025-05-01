@@ -22,14 +22,14 @@ utilities:
   loginUrl: "Forms/Account/LoginNew.aspx"
   homeUrl: "Default.aspx"
   preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
-  pdfRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/utilities/pdfPrueva.pdf"
+  pdfRoute: "/app/utilities/pdfPrueva.pdf"
   ciclo: "300"
-  usersActives: "1"
+  usersActives: "4"
   waitTimeOut: "60"
-  vinBanckRoute: "C:/Users/jgraph/Documents/JAVA/boot-001/utilities/Vins.txt"
+  vinBanckRoute: "/app/utilities/Vins.txt"
 chrome:
   driver:
-    path: "C:/Users/jgraph/Documents/JAVA/boot-001/utilities/chromedriver-win64/chromedriver.exe"
+    path: "/app/utilities/ChromeDriver/chromedriver"
 logging:
   level:
     root: INFO

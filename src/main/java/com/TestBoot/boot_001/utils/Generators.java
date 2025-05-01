@@ -1,8 +1,6 @@
 package com.TestBoot.boot_001.utils;
 
 import com.TestBoot.boot_001.pojos.Car;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -10,7 +8,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,11 +16,12 @@ import java.util.Random;
 @Slf4j
 public class Generators {
 
-    private  VinFileHandler vinFileHandler;
+    private final VinFileHandler vinFileHandler;
 
     public Generators(VinFileHandler vinFileHandler) {
         this.vinFileHandler = vinFileHandler;
     }
+
     public void selectRandomColor(WebDriver driver) {
         WebElement colorSelectElement = driver.findElement(By.id("MainContent_ddlColor1"));
         Select colorSelect = new Select(colorSelectElement);
@@ -39,12 +37,12 @@ public class Generators {
     }
 
     public String generateVin() {
-        return  vinFileHandler.obtenerYConsumirVin();
+        return vinFileHandler.obtenerYConsumirVin();
     }
 
 
-    public boolean reInsertVin(String vin) {
-        return  vinFileHandler.insertarVin(vin);
+    public void reInsertVin(String vin) {
+        vinFileHandler.insertarVin(vin);
     }
 
     public String generateContractNumber() {
@@ -60,7 +58,7 @@ public class Generators {
         WebElement fechaInput = driver.findElement(By.id("MainContent_SaleDate"));
 
         LocalDate fechaActual = LocalDate.now();
-        int añoAnterior = fechaActual.getYear() - 1;
+        int beforeYear = fechaActual.getYear() - 1;
         Random random = new Random();
 
         int mes = random.nextInt(12) + 1;
@@ -75,7 +73,7 @@ public class Generators {
             dia = random.nextInt(31) + 1;
         }
 
-        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, añoAnterior);
+        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, beforeYear);
 
         fechaInput.clear();
         fechaInput.sendKeys(fechaGenerada);
@@ -86,7 +84,7 @@ public class Generators {
         WebElement fechaInput = driver.findElement(By.name("ctl00$MainContent$DisbursementDate"));
 
         LocalDate fechaActual = LocalDate.now();
-        int añoAnterior = fechaActual.getYear() - 1;
+        int beforeYear = fechaActual.getYear() - 1;
         Random random = new Random();
 
         int mes = random.nextInt(12) + 1;
@@ -100,7 +98,7 @@ public class Generators {
             dia = random.nextInt(31) + 1;
         }
 
-        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, añoAnterior);
+        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, beforeYear);
 
         fechaInput.clear();
         fechaInput.sendKeys(fechaGenerada);
@@ -132,7 +130,7 @@ public class Generators {
         return letras.toString();
     }
 
-    public String generateYear(){
+    public String generateYear() {
         int currentYear = LocalDate.now().getYear();
         int minYear = currentYear - 2;
 
@@ -150,6 +148,7 @@ public class Generators {
 
         return brands[randomIndex];
     }
+
     public String generateModel(String make) {
         Random random = new Random();
 
@@ -161,14 +160,14 @@ public class Generators {
         make = make.toUpperCase();
 
         if (make.equals("TOYOTA")) return toyotaModels[random.nextInt(toyotaModels.length)];
-        if (make.equals("LEXUS")) return  lexusModels[random.nextInt(lexusModels.length)];
-        if (make.equals("KIA")) return  kiaModels[random.nextInt(kiaModels.length)];
-        if (make.equals("HYUNDAI")) return  hyundaiModels[random.nextInt(hyundaiModels.length)];
+        if (make.equals("LEXUS")) return lexusModels[random.nextInt(lexusModels.length)];
+        if (make.equals("KIA")) return kiaModels[random.nextInt(kiaModels.length)];
+        if (make.equals("HYUNDAI")) return hyundaiModels[random.nextInt(hyundaiModels.length)];
 
         return "Marca no encontrada.";
     }
 
-    public void generateCar(Car car){
+    public void generateCar(Car car) {
         String year = generateYear();
         String make = generateMake();
         String model = generateModel(make);
