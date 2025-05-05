@@ -1,35 +1,66 @@
 server:
-  port: 8080
+  port: 8082
 spring:
   output:
     ansi:
       enabled: always
   application:
     name: boot-001
+users:
+  users:
+    jovidio: "123456"
+    nmartinez: "123456"
+    jrivera5: "Pdv#001"
 utilities:
-  user1: "jovidio"
-  user2: "nmartinez"
-  user3: "jrivera5"
-  user4: "ccartagena33057"
-  password1: "123456"
-  password2: "123456"
-  password3: "Pdv#001"
-  password4: "Pdv#001"
   concesionario: "SJ2124"
   licence: "7006169"
-  mode: ""
   baseUrl: "https://pdvprod-preprod.azurewebsites.net/"
   loginUrl: "Forms/Account/LoginNew.aspx"
   homeUrl: "Default.aspx"
   preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
-  pdfRoute: "/app/utilities/pdfPrueva.pdf"
+  pdfRoute: "C:/Users/jgraph/Documents/JAVA/api-boot-service/utilities/pdfPrueva.pdf"
+  vinBanckRoute: "C:/Users/jgraph/Documents/JAVA/api-boot-service/utilities/Vins.txt"
   ciclo: "300"
-  usersActives: "4"
-  waitTimeOut: "60"
-  vinBanckRoute: "/app/utilities/Vins.txt"
+  concurrency: 1
+  waitTimeOut: 60
+elements:
+  usernameInput: "LoginUser_UserName"
+  passwordInput: "LoginUser_Password"
+  vinInput: "MainContent_txtVIN"
+  plateInput: "MainContent_txtPlateNumber"
+  yearInput: "MainContent_txtYear"
+  makeInput: "MainContent_txtMake"
+  modelInput: "MainContent_txtModel"
+  contractNumberInput: "MainContent_contracNumber"
+  licenceInput: "MainContent_txtLicenseNumber"
+  saleDateInput: "MainContent_SaleDate"
+  reimbursementDateInput: "MainContent_DisbursementDate"
+  dealerLicenceInput: "MainContent_txtLicense"
+  concessionaryName: "MainContent_txtConcesionarioName"
+  dealerLicenseDate: "MainContent_txtLicenseDate"
+  dateUserConfirmation: "MainContent_btnConfirmationOwner"
+  fileInputCssSelector: "input[type='file']"
+  fileNameCellXpath: "//td[normalize-space(text()) != '']"
+  subTypeSelect: "MainContent_ddlMySubType"
+  subTypeRegisterValue: "16"
+  colorSelect: "MainContent_ddlColor1"
+  SubmitLoginButton: "iniciar-sesin-1"
+  termConditionButton1: "ucTermsConditions_gvTermConditionsBullets_chkChecked_0"
+  termConditionButton2: "ucTermsConditions_gvTermConditionsBullets_chkChecked_1"
+  termConditionButton3: "ucTermsConditions_gvTermConditionsBullets_chkChecked_2"
+  termConditionButton4: "ucTermsConditions_gvTermConditionsBullets_chkChecked_3"
+  termConditionConfirmButton: "ucTermsConditions_btnSubmit"
+  preSaleButton: "MainContent_navMenu_btnCarPartialRegistration"
+  vinSerchButton: "MainContent_BtnSearchVIN"
+  dealerLicenseSerchButton: "MainContent_BtnSearchLicense"
+  digitalCheckButton1: "MainContent_chkConfirmation"
+  digitalCheckButton2: "MainContent_CheckBox1"
+  fileButtonCssSelector: "input.ruButton.ruBrowse"
+  continueButton: "PageFunctionsContent_ucRightFunctionBox_lvwFunctions_imbFunction_0"
+  tryAgainButton: "MainContent_btnYes"
 chrome:
   driver:
-    path: "/app/utilities/ChromeDriver/chromedriver"
+    path: "C:/Users/jgraph/Documents/JAVA/api-boot-service/utilities/chromedriver-win64/chromedriver.exe"
 logging:
   level:
     root: INFO

@@ -5,17 +5,7 @@ en el portal de vehículos, utilizando Selenium, Java y Spring Boot.
 Está diseñado para ejecutarse como un `.jar` empaquetado
 o dentro de un contenedor Docker.
 
-utilizaciones
-------------------------------------------
--JAVA JDK v21.0.6
--SPRING BOOT v3.4.4
--SELENIUM v4.19.1
--CHROME-DRIVE v2.0
--DOCKER-DESKTOP
--
-
 ---
-
 
 ## 🧱 Estructura del Proyecto
 
@@ -61,54 +51,3 @@ como parte del proceso de registro.
 
 6- Repite el proceso: El flujo se repite el número de veces indicado en el ciclo,
 que puede ser configurado en el archivo application.yaml.
-
-
-
------------------------------------------------------------------------------
-estructura programada en Dockerfile
------------------------------------------------------------------------------
-├── Dockerfile
-├── README.ME
-├── entryPoint.sh
-├── utilities
-│   ├── ChromeDriver
-│   │   ├── chromedriver
-│   │   ├── LICENSE.chromedriver
-│   │   ├── THIRD_PARTY_NOTICES.chromedriver
-│   ├── pdfPrueva.pdf
-└── └── Vins.txt
-
-variables de entorno disponibles para dinamizar su valor
--------------------------------------------------------------------------------
--e UTILITIES_USER1="jovidio"        --> username usuario simulado
--e UTILITIES_USER2="nmartinez"      ---> contraseña usuario simulado
--e UTILITIES_USER3="jrivera5"
--e UTILITIES_USER4="ccartagena33057"
--e UTILITIES_PASSWORD1="123456"
--e UTILITIES_PASSWORD2="123456"
--e UTILITIES_PASSWORD3="Pdv#001"
--e UTILITIES_PASSWORD4="Pdv#001"
--e UTILITIES_CONCESIONARIO="SJ2124"    ----> numero de licencia concesionario de pruebas
--e UTILITIES_LICENCE="7006169"         ----> licencia de conducir de comprador de pruebas
--e UTILITIES_MODE="PROD"               ---->  a la hora de crear el contenedor es de suma importancia
-                                              que usemos el valor "test" si se trata del portal de
-                                              test o mantenerlo vacio o cualquier otro valor si
-                                              se trata del portal de pre-prod, esto por los campos faltantes
-                                              en pre-prod, por lo que se puede usar esta imagen para la creacion
-                                              de ambos contenedores.
-
--e UTILITIES_BASE_URL="https://pdvprod-preprod.azurewebsites.net/"  ---> url base + /
--e UTILITIES_LOGIN_URL="Forms/Account/LoginNew.aspx"                ---> url login(sin la parte base)
--e UTILITIES_HOME_URL="Default.aspx"                                ---> url home(sin la parte base)
--e UTILITIES_PREVENTA_URL="Forms/CarPartialRegistrationBatch.aspx"  ---> url pre-venta en lote
--e UTILITIES_PDF_ROUTE="/app/utilities/pdfPrueva.pdf"               ---> ruta a pdf de prueba
--e UTILITIES_CICLO="300"                                            ---> cantidad de tareas por usuario requeridas
--e UTILITIES_USERS_ACTIVES="2"                                      ---> cantidad de 1 - 4 para activar simultanea mente
--e UTILITIES_WAIT_TIME_OUT="60"                                     ---> tiempo de espera por accion
--e UTILITIES_VIN_BANCK_ROUTE="/app/utilities/Vins.txt"              ---> txt banco de vins validos para pruevas
--e CHROME_DRIVER_PATH="/app/utilities/ChromeDriver/chromedriver"    ---> ruta al archivo de chrome-driver
-
-de querer cambiar uno de estos valores a la hora de crear contenedores, tomar en cuenta la estructura
-ya que decidi copiar todos los archivos y directorios en la /app...
-
-

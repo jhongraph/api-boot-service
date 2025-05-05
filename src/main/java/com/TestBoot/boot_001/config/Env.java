@@ -5,20 +5,15 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Configuration
 @ConfigurationProperties(prefix = "utilities")
 public class Env {
 
-    private String user1;
-    private String user2;
-    private String user3;
-    private String user4;
-    private String password1;
-    private String password2;
-    private String password3;
-    private String password4;
+    private List<String> users;
     private String licence;
     private String baseUrl;
     private String loginUrl;
@@ -28,8 +23,7 @@ public class Env {
     private String GeneratorVinkey;
     private String concesionario;
     private String vinBanckRoute;
-    private String mode;
     private int ciclo;
     private int waitTimeOut;
-    private int usersActives;
+    private int concurrency;
 }

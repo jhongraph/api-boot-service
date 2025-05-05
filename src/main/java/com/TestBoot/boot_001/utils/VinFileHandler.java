@@ -3,7 +3,6 @@ package com.TestBoot.boot_001.utils;
 import com.TestBoot.boot_001.config.Env;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -15,6 +14,7 @@ import java.util.List;
 public class VinFileHandler {
 
     Env env;
+
     @Autowired
     public VinFileHandler(Env env) {
         this.env = env;
@@ -32,7 +32,7 @@ public class VinFileHandler {
                 return null;
             }
 
-            String vin = lines.get(0).trim();
+            String vin = lines.getFirst().trim();
 
             List<String> remaining = lines.subList(1, lines.size());
             Files.write(path, remaining, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);

@@ -17,32 +17,24 @@ import java.util.Random;
 public class Generators {
 
     private final VinFileHandler vinFileHandler;
+    private final DomElement element;
 
-    public Generators(VinFileHandler vinFileHandler) {
+
+    public Generators(VinFileHandler vinFileHandler, DomElement element) {
         this.vinFileHandler = vinFileHandler;
+        this.element = element;
     }
 
     public void selectRandomColor(WebDriver driver) {
-        WebElement colorSelectElement = driver.findElement(By.id("MainContent_ddlColor1"));
-        Select colorSelect = new Select(colorSelectElement);
+        Select colorDropdown = new Select(driver.findElement(By.id(element.getColorSelect())));
+        List<WebElement> options = colorDropdown.getOptions();
+        int randomIndex = new Random().nextInt(options.size() - 1) + 1;
+        colorDropdown.selectByIndex(randomIndex);
 
-        List<WebElement> opciones = colorSelect.getOptions().subList(1, colorSelect.getOptions().size());
-
-        Random random = new Random();
-        WebElement opcionAleatoria = opciones.get(random.nextInt(opciones.size()));
-
-        colorSelect.selectByValue(opcionAleatoria.getAttribute("value"));
-
-        log.info("Color seleccionado aleatoriamente: {}", opcionAleatoria.getText());
     }
 
     public String generateVin() {
-        return vinFileHandler.obtenerYConsumirVin();
-    }
-
-
-    public void reInsertVin(String vin) {
-        vinFileHandler.insertarVin(vin);
+        return  vinFileHandler.obtenerYConsumirVin();
     }
 
     public String generateContractNumber() {
@@ -55,10 +47,10 @@ public class Generators {
 
     public void selectRandomSaleDate(WebDriver driver) {
 
-        WebElement fechaInput = driver.findElement(By.id("MainContent_SaleDate"));
+        WebElement dateInput = driver.findElement(By.id(element.getSaleDateInput()));
 
-        LocalDate fechaActual = LocalDate.now();
-        int beforeYear = fechaActual.getYear() - 1;
+        LocalDate dateNow = LocalDate.now();
+        int beforeYear = dateNow.getYear() - 1;
         Random random = new Random();
 
         int mes = random.nextInt(12) + 1;
@@ -73,18 +65,18 @@ public class Generators {
             dia = random.nextInt(31) + 1;
         }
 
-        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, beforeYear);
+        String generatedDate = String.format("%02d/%02d/%d", dia, mes, beforeYear);
 
-        fechaInput.clear();
-        fechaInput.sendKeys(fechaGenerada);
+        dateInput.clear();
+        dateInput.sendKeys(generatedDate);
     }
 
     public void selectRandomReimbursementDate(WebDriver driver) {
 
-        WebElement fechaInput = driver.findElement(By.name("ctl00$MainContent$DisbursementDate"));
+        WebElement dateInput = driver.findElement(By.id(element.getReimbursementDateInput()));
 
-        LocalDate fechaActual = LocalDate.now();
-        int beforeYear = fechaActual.getYear() - 1;
+        LocalDate dateNow = LocalDate.now();
+        int beforeYear = dateNow.getYear() - 1;
         Random random = new Random();
 
         int mes = random.nextInt(12) + 1;
@@ -98,39 +90,39 @@ public class Generators {
             dia = random.nextInt(31) + 1;
         }
 
-        String fechaGenerada = String.format("%02d/%02d/%d", dia, mes, beforeYear);
+        String generatedDate = String.format("%02d/%02d/%d", dia, mes, beforeYear);
 
-        fechaInput.clear();
-        fechaInput.sendKeys(fechaGenerada);
+        dateInput.clear();
+        dateInput.sendKeys(generatedDate);
     }
 
-    public void insertRandomPlate(WebDriver driver, WebDriverWait wait) {
-        WebElement placaInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.id("MainContent_txtPlateNumber")));
+    public void insertRandomPlate(WebDriverWait wait) {
+        WebElement plateInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.id(element.getPlateInput())));
 
-        String letras = generateLetters(3);
+        String letters = generateLetters();
 
-        String numeros = String.format("%03d", new Random().nextInt(1000));
+        String numbers = String.format("%03d", new Random().nextInt(1000));
 
-        String placa = letras + numeros;
+        String plate = letters + numbers;
 
-        placaInput.clear();
-        placaInput.sendKeys(placa);
+        plateInput.clear();
+        plateInput.sendKeys(plate);
     }
 
-    private String generateLetters(int cantidad) {
+    private String generateLetters() {
         Random random = new Random();
-        StringBuilder letras = new StringBuilder();
+        StringBuilder letters = new StringBuilder();
 
-        for (int i = 0; i < cantidad; i++) {
+        for (int i = 0; i < 3; i++) {
             char letra = (char) ('A' + random.nextInt(26));
-            letras.append(letra);
+            letters.append(letra);
         }
 
-        return letras.toString();
+        return letters.toString();
     }
 
-    public String generateYear() {
+    public String generateYear(){
         int currentYear = LocalDate.now().getYear();
         int minYear = currentYear - 2;
 
@@ -148,7 +140,6 @@ public class Generators {
 
         return brands[randomIndex];
     }
-
     public String generateModel(String make) {
         Random random = new Random();
 
@@ -160,18 +151,20 @@ public class Generators {
         make = make.toUpperCase();
 
         if (make.equals("TOYOTA")) return toyotaModels[random.nextInt(toyotaModels.length)];
-        if (make.equals("LEXUS")) return lexusModels[random.nextInt(lexusModels.length)];
-        if (make.equals("KIA")) return kiaModels[random.nextInt(kiaModels.length)];
-        if (make.equals("HYUNDAI")) return hyundaiModels[random.nextInt(hyundaiModels.length)];
+        if (make.equals("LEXUS")) return  lexusModels[random.nextInt(lexusModels.length)];
+        if (make.equals("KIA")) return  kiaModels[random.nextInt(kiaModels.length)];
+        if (make.equals("HYUNDAI")) return  hyundaiModels[random.nextInt(hyundaiModels.length)];
 
-        return "Marca no encontrada.";
+        return "MARCA NO ENCONTRADA.";
     }
 
-    public void generateCar(Car car) {
+    public void generateCar(Car car){
+        String vin  = generateVin();
         String year = generateYear();
         String make = generateMake();
         String model = generateModel(make);
 
+        car.setVin(vin);
         car.setYear(year);
         car.setMake(make);
         car.setModel(model);

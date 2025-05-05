@@ -1,5 +1,6 @@
 package com.TestBoot.boot_001.config;
 
+import com.TestBoot.boot_001.utils.DomElement;
 import com.TestBoot.boot_001.utils.Generators;
 import com.TestBoot.boot_001.utils.VinFileHandler;
 import lombok.AllArgsConstructor;
@@ -18,12 +19,14 @@ public class Config {
 
     @Autowired
     private VinFileHandler vinFileHandler;
+    @Autowired
+    private DomElement element;
 
 
     @Bean
     public Generators generators() {
 
-        return new Generators(vinFileHandler);
+        return new Generators(vinFileHandler, element);
     }
 }
 
