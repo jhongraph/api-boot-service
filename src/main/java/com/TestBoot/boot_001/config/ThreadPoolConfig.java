@@ -1,6 +1,7 @@
 package com.TestBoot.boot_001.config;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,10 @@ public class ThreadPoolConfig {
 
     @Getter
     private int CurrencyPossible;
+
+    @Getter
+    @Setter
+    private boolean alreadyNotified;
 
     public ThreadPoolConfig(Env env) {
         this.env = env;
@@ -51,20 +56,22 @@ public class ThreadPoolConfig {
         int tasksToExecute = Math.min(requestedTasks, maxTasks);
 
         this.CurrencyPossible = tasksToExecute;
+        this.alreadyNotified = false;
 
         return getThreadPoolTaskExecutor(tasksToExecute);
     }
 
     private static ThreadPoolTaskExecutor getThreadPoolTaskExecutor(int corePoolSize) {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(corePoolSize);  // Usar el número calculado de hilos
-        executor.setMaxPoolSize(corePoolSize); // maximo de tareas permitidas
-        executor.setQueueCapacity(0); // no permite colas, rechaza las demás tareas
-        executor.setThreadNamePrefix("selenium-thread-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
-        executor.initialize();
-        return executor;
+
+            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+            executor.setCorePoolSize(corePoolSize);  // Usar el número calculado de hilos
+            executor.setMaxPoolSize(corePoolSize); // maximo de tareas permitidas
+            executor.setQueueCapacity(0); // no permite colas, rechaza las demás tareas
+            executor.setThreadNamePrefix("user-");
+            executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+            executor.setWaitForTasksToCompleteOnShutdown(true);
+            executor.setAwaitTerminationSeconds(30);
+            executor.initialize();
+            return executor;
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @Component
 @Data
@@ -22,28 +21,27 @@ public class GenerateUser {
     @Autowired
     private Users usersConfig;
 
-    public User gettingUser() {
-        Map<String, String> users = usersConfig.getUsers();
+    public void gettingUser(User userData) {
+            int currency = userData.getCurrency();
 
-        User usersData = new User();
+        Map<String, String> users = usersConfig.getUsers();
 
         if (users != null && !users.isEmpty()) {
             List<Map.Entry<String, String>> entries = new ArrayList<>(users.entrySet());
 
-            Random random = new Random();
-            Map.Entry<String, String> randomEntry = entries.get(random.nextInt(entries.size()));
+
+            Map.Entry<String, String> randomEntry =  entries.get(currency);
 
             String user = randomEntry.getKey();
             String password = randomEntry.getValue();
 
-            usersData.setUsername(user);
-            usersData.setPassword(password);
+            userData.setUsername(user);
+            userData.setPassword(password);
+            userData.setCurrency(currency == entries.size() -1 ? 0 : currency +1);
 
-            log.debug("user: {}, pass: {}", user, password);
 
         } else {
             log.warn("NO HAY USUARIOS DISPONIBLES.");
         }
-        return usersData;
     }
 }

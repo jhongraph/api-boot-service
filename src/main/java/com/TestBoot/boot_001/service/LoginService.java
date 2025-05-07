@@ -9,10 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.TestBoot.boot_001.interactions.DomInteractions.waitAndClick;
 import static com.TestBoot.boot_001.interactions.DomInteractions.waitAndType;
@@ -44,6 +47,17 @@ public class LoginService {
             waitAndClick(wait, By.className(element.getSubmitLoginButton()));
 
             wait.until(ExpectedConditions.urlContains(env.getHomeUrl()));
+
+            List<WebElement> buttons = driver.findElements(By.id(element.getTermConditionConfirmButton()));
+            if (!buttons.isEmpty() && buttons.getFirst().isDisplayed()) {
+                waitAndClick( wait, By.id(element.getTermConditionButton1()));
+                waitAndClick( wait, By.id(element.getTermConditionButton2()));
+                waitAndClick(wait, By.id(element.getTermConditionButton3()));
+                waitAndClick( wait, By.id(element.getTermConditionButton4()));
+                waitAndClick( wait, By.id(element.getTermConditionConfirmButton()));
+            }
+
+            waitAndClick(wait, By.id(element.getPreSaleButton()));
 
         } catch (TimeoutException | ElementNotFoundException e) {
             throw new SeleniumTimeoutException(e.getMessage());

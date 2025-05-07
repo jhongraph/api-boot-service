@@ -11,6 +11,7 @@ users:
     jovidio: "123456"
     nmartinez: "123456"
     jrivera5: "Pdv#001"
+    ccartagena33057: "Pdv#001"
 utilities:
   concesionario: "SJ2124"
   licence: "7006169"
@@ -18,11 +19,11 @@ utilities:
   loginUrl: "Forms/Account/LoginNew.aspx"
   homeUrl: "Default.aspx"
   preventaUrl: "Forms/CarPartialRegistrationBatch.aspx"
-  pdfRoute: "C:/Users/jgraph/Documents/JAVA/api-boot-service/utilities/pdfPrueva.pdf"
-  vinBanckRoute: "C:/Users/jgraph/Documents/JAVA/api-boot-service/utilities/Vins.txt"
-  ciclo: "300"
-  concurrency: 1
-  waitTimeOut: 60
+  pdfRoute: "/app/utilities/pdfPrueva.pdf"
+  vinBanckRoute: "/app/utilities/Vins.txt"
+  ciclo: 200
+  concurrency: 25
+  waitTimeOut: 30
 elements:
   usernameInput: "LoginUser_UserName"
   passwordInput: "LoginUser_Password"
@@ -60,7 +61,7 @@ elements:
   tryAgainButton: "MainContent_btnYes"
 chrome:
   driver:
-    path: "C:/Users/jgraph/Documents/JAVA/api-boot-service/utilities/chromedriver-win64/chromedriver.exe"
+    path: "/app/utilities/ChromeDriver/chromedriver"
 logging:
   level:
     root: INFO

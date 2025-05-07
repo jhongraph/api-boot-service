@@ -15,7 +15,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 import static com.TestBoot.boot_001.interactions.DomInteractions.*;
@@ -46,17 +45,6 @@ public class AutoFillService {
 
             generators.generateCar(car);
 
-            List<WebElement> buttons = driverParam.findElements(By.id(element.getTermConditionConfirmButton()));
-            if (!buttons.isEmpty() && buttons.getFirst().isDisplayed()) {
-                waitAndClick( wait, By.id(element.getTermConditionButton1()));
-                waitAndClick( wait, By.id(element.getTermConditionButton2()));
-                waitAndClick(wait, By.id(element.getTermConditionButton3()));
-                waitAndClick( wait, By.id(element.getTermConditionButton4()));
-                waitAndClick( wait, By.id(element.getTermConditionConfirmButton()));
-            }
-
-            waitAndClick(wait, By.id(element.getPreSaleButton()));
-
             selectDropdownByValue(wait, element.getSubTypeSelect(), element.getSubTypeRegisterValue());
 
             waitAndType(wait, By.id(element.getVinInput()), car.getVin());
@@ -68,7 +56,6 @@ public class AutoFillService {
             if (Objects.requireNonNull(yearInput.getAttribute("value")).isEmpty()) {
                 yearInput.sendKeys(String.valueOf(car.getYear()));
             }
-
 
             WebElement makeInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(element.getMakeInput())));
 
