@@ -1,9 +1,9 @@
 package com.TestBoot.boot_001.utils;
 
 import com.TestBoot.boot_001.config.Env;
+import com.TestBoot.boot_001.config.ThreadPoolConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -14,24 +14,20 @@ import java.util.List;
 @Component
 public class VinFileHandler {
 
-    Env env;
-
+    private final Env env;
+    private final ThreadPoolConfig config;
 
     @Autowired
-    public VinFileHandler(Env env) {
+    public VinFileHandler(Env env, ThreadPoolConfig config) {
         this.env = env;
+        this.config = config;
     }
 
-    private static final int VIN_THRESHOLD = 100;
-
-    public String obtenerYConsumirVin() {
+    public String getVin() {
         try {
-
-
 
             Path path = Paths.get(env.getVinBanckRoute());
 
-            // Leer todas las líneas del archivo
             List<String> lines = Files.readAllLines(path);
 
             if (lines.isEmpty()) {
@@ -39,16 +35,30 @@ public class VinFileHandler {
                 return null;
             }
 
-            // Obtener la primera línea (VIN a usar)
-            String vin = lines.get(0).trim();
+            String vin = lines.getFirst().trim();
 
-            // Eliminar la primera línea del archivo
             List<String> remaining = lines.subList(1, lines.size());
             Files.write(path, remaining, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
 
-            // Verificar si quedan menos de 100 VINs
-            if (remaining.size() < VIN_THRESHOLD) {
-                log.warn("Quedan menos de 100 VINs en el archivo: {}", remaining.size());
+            if (!config.isAlreadyNotifiedVinWarn()) {
+
+                if (remaining.size() < 1000 && remaining.size() > 495) {
+                    log.warn("Quedan menos de 1000 VINs en el archivo: {}", remaining.size());
+                }
+
+                if (remaining.size() < 500 && remaining.size() > 249) {
+                    log.warn("Quedan menos de 500 VINs en el archivo: {}", remaining.size());
+                }
+
+                if (remaining.size() < 250 && remaining.size() > 99) {
+                    log.warn("Quedan menos de 250 VINs en el archivo: {}", remaining.size());
+                }
+
+                if (remaining.size() < 100) {
+                    log.warn("Quedan menos de 100 VINs en el archivo: {}", remaining.size());
+                }
+
+                config.setAlreadyNotifiedVinWarn(true);
             }
 
             return vin;
@@ -56,6 +66,24 @@ public class VinFileHandler {
         } catch (IOException e) {
             log.error("Error al manejar el archivo de VINs", e);
             return null;
+        }
+    }
+
+    public boolean reInsertVin(String vin) {
+        try {
+            Path path = Paths.get(env.getVinBanckRoute());
+
+            List<String> lines = Files.readAllLines(path);
+            if (lines.contains(vin)) {
+                return false;
+            }
+
+            Files.write(path, (vin + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+
+            return true;
+
+        } catch (IOException e) {
+            return false;
         }
     }
 }

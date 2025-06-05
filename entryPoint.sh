@@ -1,6 +1,9 @@
 #!/bin/bash
 
-echo "🚀 Iniciando boot-preventa:"
-java -jar app.jar
+echo " Iniciando Servidor Web..."
+python3 /app/web_launcher.py
 
-tail -f /dev/null
+#echo "🚀 Iniciando boot-preventa:"
+#java -jar app.jar
+#echo "🛑 Saliendo del sistema"
+#exit 1

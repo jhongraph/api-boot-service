@@ -6,7 +6,8 @@
     <appender name="CUSTOM_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %d{dd/MM/yyyy HH:mm} %clr(%-5level){INFO:green, ERROR:red, WARN:yellow, PreSaleThread-1 = blue, PreSaleThread-2 = purple} [%thread] %replace(%X{userColor}){'\\e','\u001B'} - %msg%n
+                %d{dd/MM/yyyy HH:mm} %clr(%-5level){INFO:green, ERROR:red, WARN:yellow, PreSaleThread-1 = blue,
+                PreSaleThread-2 = purple} [%thread] %replace(%X{userColor}){'\\e','\u001B'} - %msg%n
             </pattern>
 
         </encoder>

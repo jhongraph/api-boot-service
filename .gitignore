@@ -32,8 +32,3 @@ build/
 ### VS Code ###
 .vscode/
 
-/chromedriver-win64
-/ChromeDriver
-/chrome
-
-
