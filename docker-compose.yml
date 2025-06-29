@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    volumes:
+      - app_config:/app/utilities
+    ports:
+      - "8080:8080"
+    command: >
+      sh -c "cp -vrn /app/utilities/. /app/config/"
+    environment:
+      - SPRING_CONFIG_LOCATION=file:/app/utilities/application.yaml
+volumes:
+  app_config:
